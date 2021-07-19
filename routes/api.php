@@ -19,4 +19,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/user/create', [UsersController::class, 'createUser']); //create data 
+Route::post('/user/create', [UsersController::class, 'createUser']); //create user data 
+Route::get('/user/view-users', [UsersController::class, 'getUser']);  //get user data
+// Route::get('/user/view-user/{id}', [UsersController::class, 'getUserByID']);   //query builder
+Route::get('/user/view-user/{user}', [UsersController::class, 'getUserByID']);    //eloquent
+Route::delete('/user/delete-user/{id}', [UsersController::class, 'deleteUserById']);

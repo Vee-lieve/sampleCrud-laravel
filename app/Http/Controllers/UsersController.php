@@ -33,25 +33,108 @@ class UsersController extends Controller
            $response["erors"] = $validation->errors();  //store errors in the response var 
            $response["code"] = 400;
        }else {
-            DB::beginTransaction();  //query builder
+            DB::beginTransaction();  //query builder for an interaction on database
             try {
                 $data = $request->all();      //store
                 $data["password"] = Hash::make($data["password"]); //encrypt password
                 $user = User::create($data);     //create data 
                 $response["message"] = "Successfully added"; 
                 $response["last inserted id"] = $user->id;     //
-                $response["code"] = 201;
+                $response["code"] = 201;   //create data
                 
                 DB::commit(); 
             } 
             //errors
            catch(\Exception $e) {   
-               DB::rollBack();
+               DB::rollBack();   //
                $response["errors"] = "The user was not created. .$e";  
                $response["code"] = 400;
            }
        }
 
        return response($response, $response["code"]);   //$response(message, last inserted id, errors)
+   }
+
+   public function getUser() {
+
+        $response = [];
+
+        try {
+            $users = User::all();           //check all the values of users
+            $response["users"] = $users;   //stores the value of $users to the $response var
+            $response["code"] = 200;    //get data
+       }
+
+       catch (\Exception $e) {
+           $response["errors"] = "No users found. .$e";
+           $response["code"] = 400;
+       }
+
+       return response($response, $response["code"]);
+   }
+
+   public function getUserByID($id) {
+
+        $response = [];
+
+        try {
+            //query builder
+            // $user = User::where('id', $id)->get();      
+            $user = User::findOrFail($id);             //other way to find user by id, built in method
+            $response["user"] = $user;
+            $response["code"] = 200;
+        }
+
+        catch(\Exception $e) {
+            $response["errors"] = "No user found. .$e";
+            $response["code"] = 400;
+    }
+
+        return response($response, $response["code"]);
+   }
+   
+   public function deleteUserById($id) {
+
+        $response = [];
+
+        try {
+            $user = User::findOrFail($id)->delete();
+            $response["user"] = $user;
+            $response["message"] = "Successfully deleted.";
+            $response["code"] = 200;
+        }
+        catch(\Exception $e) {
+            $response["errors"] = "No user to be deleted. .$e";
+            $response["code"] = 400;
+        }
+
+        return response($response, $response["code"]);
+   }
+
+   public function updateUserById(Request $request, $id) {
+
+        $validation = Validator::make($request->all(), [
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'username' => 'required',
+            'email_address' => 'required',
+        ]);
+        
+        $response = [];
+        if($validation->fails()) {
+
+            $response["errors"] = $validation->errors();
+            $response["code"] = 400;
+
+        } else {
+            
+            DB::beginTransaction();
+            try {
+            
+            }
+            catch(\Exception $e) {
+    
+            }
+        }
    }
 }
