@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+use function GuzzleHttp\Promise\all;
+
 class UsersController extends Controller
 {
    /**
@@ -35,8 +37,8 @@ class UsersController extends Controller
        }else {
             DB::beginTransaction();  //query builder for an interaction on database
             try {
-                $data = $request->all();      //store
-                $data["password"] = Hash::make($data["password"]); //encrypt password
+                $data = $request->all();      //store data into the $data variable
+                $data["password"] = Hash::make($data["password"]);  //encrypt password
                 $user = User::create($data);     //create data 
                 $response["message"] = "Successfully added"; 
                 $response["last inserted id"] = $user->id;     //
@@ -103,6 +105,7 @@ class UsersController extends Controller
             $response["message"] = "Successfully deleted.";
             $response["code"] = 200;
         }
+
         catch(\Exception $e) {
             $response["errors"] = "No user to be deleted. .$e";
             $response["code"] = 400;
@@ -114,27 +117,34 @@ class UsersController extends Controller
    public function updateUserById(Request $request, $id) {
 
         $validation = Validator::make($request->all(), [
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'username' => 'required',
-            'email_address' => 'required',
+            'first_name'=> 'required',
+            'last_name'=> 'required',
+            'username'=> 'required',
+            'email_address'=> 'required|email|unique:users'
         ]);
         
         $response = [];
-        if($validation->fails()) {
-
-            $response["errors"] = $validation->errors();
+        if ($validation->fails()) {
+            $response["erors"] = $validation->errors();
             $response["code"] = 400;
-
         } else {
-            
             DB::beginTransaction();
-            try {
-            
+            try {   
+                $data = $request->all();
+                $data["password"] = Hash::make(($data["password"]));
+                // $user = User::where('id', $id)->update($data);
+                $user = User::findOrFail($id)->update($data);
+                $response["message"] = "Successfully updated";
+                $response["last inserted id"] = $user->$id;
+                $response["code"] = 200;
             }
+
             catch(\Exception $e) {
-    
+                $response["errors"] = "User not updated. .$e";
+                $response["code"] = 400;
             }
         }
+
+        return response($response, $response["code"]);
    }
 }

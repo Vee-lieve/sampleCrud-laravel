@@ -24,3 +24,4 @@ Route::get('/user/view-users', [UsersController::class, 'getUser']);  //get user
 // Route::get('/user/view-user/{id}', [UsersController::class, 'getUserByID']);   //query builder
 Route::get('/user/view-user/{user}', [UsersController::class, 'getUserByID']);    //eloquent
 Route::delete('/user/delete-user/{id}', [UsersController::class, 'deleteUserById']);
+Route::put('/user/update-user/{id}', [UsersController::class, 'updateUserById']);
