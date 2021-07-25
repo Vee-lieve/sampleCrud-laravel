@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Cars;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class CarsController extends Controller
 {
@@ -35,7 +37,37 @@ class CarsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validation = Validator::make($request->all(), [
+            'brand',
+            'model',
+            'color',
+            'price'
+        ]);
+
+        $response = [];
+        if ($validation->fails()) {
+            $response["errors"] = $validation->errors();
+            $response["code"] = 400;
+        } else {
+            DB::beginTransaction();
+            try {
+                $data = $request->all();
+                $car = Cars::create($data);
+                $response["message"] = "Car is successfully created";
+                $response["last inserted id"] = $car;
+                $response["code"] = 201;
+                
+                DB::commit();
+            }
+
+            catch(\Exception $e) {
+                DB::rollBack();
+                $response["errors"] = "Car is not successfully created. .$e";
+                $response["code"] = 400;
+            }
+        }
+
+        return response($response, $response["code"]);
     }
 
     /**

@@ -40,15 +40,15 @@ class UsersController extends Controller
                 $data = $request->all();      //store data into the $data variable
                 $data["password"] = Hash::make($data["password"]);  //encrypt password
                 $user = User::create($data);     //create data 
-                $response["message"] = "Successfully added"; 
+                $response["message"] = "User is successfully created"; 
                 $response["last inserted id"] = $user->id;     //
                 $response["code"] = 201;   //create data
                 
-                DB::commit(); 
+                DB::commit();    //commits the data to the database
             } 
             //errors
            catch(\Exception $e) {   
-               DB::rollBack();   //
+               DB::rollBack();   //prevents the changes in the database if errors occurs
                $response["errors"] = "The user was not created. .$e";  
                $response["code"] = 400;
            }
@@ -131,15 +131,19 @@ class UsersController extends Controller
             DB::beginTransaction();
             try {   
                 $data = $request->all();
-                $data["password"] = Hash::make(($data["password"]));
+                // $data["password"] = Hash::make(($data["password"]));
                 // $user = User::where('id', $id)->update($data);
-                $user = User::findOrFail($id)->update($data);
+               $user = User::findOrFail($id)->update($data);
+              
                 $response["message"] = "Successfully updated";
-                $response["last inserted id"] = $user->$id;
+                $response["last inserted id"] = $id;
                 $response["code"] = 200;
+
+                DB::commit(); 
             }
 
             catch(\Exception $e) {
+                DB::rollBack();
                 $response["errors"] = "User not updated. .$e";
                 $response["code"] = 400;
             }
